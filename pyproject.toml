@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pysum"
+# Static rather than derived from a git tag, which is what py-canon uses:
+# this repo has no tags at all, so uv-dynamic-versioning would have nothing to
+# read. `preen adopt --release-migration` switches it over once a v0.1.1 tag
+# exists. 0.1.1 matches what is on PyPI today.
+version = "0.1.1"
+description = "Summarize pandas DataFrames"
+readme = "README.rst"
+# setup.py declared no python_requires, so PyPI shows the release as
+# installable on anything, and the classifiers advertised 2.7, 3.5 and 3.6.
+# That was already fiction for a pandas tool. This is the py-canon floor, and
+# it narrows what a *future* release accepts; 0.1.1 on PyPI is untouched.
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Gaurav Sood", email = "gsood07@gmail.com" }]
+keywords = ["summarize", "pandas"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+# Unpinned, as setup.py had them. requirements.txt pins pytablewriter==0.27.2
+# and tabulate==0.8.2; those are a development lockfile and pinning them here
+# would force every consumer onto 2018 releases.
+dependencies = ["pandas", "pytablewriter", "tabulate"]
+
+[project.optional-dependencies]
+dev = ["check-manifest"]
+test = ["coverage"]
+
+[project.urls]
+Homepage = "https://github.com/finite-sample/pysum"
+Repository = "https://github.com/finite-sample/pysum"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pysum"]
