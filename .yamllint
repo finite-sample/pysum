@@ -1,0 +1,28 @@
+# yamllint's defaults are hostile to GitHub workflow files, so the job that
+# used them was pointed at `*/` -- a glob over root directories that contains
+# no workflows. It passed by linting nothing. Pointing it at .github/ made it
+# work, and it immediately found real formatting problems that had been there
+# all along.
+#
+# These three relaxations are about GitHub's own conventions, not about
+# lowering the bar:
+extends: default
+
+rules:
+  # Workflows do not begin with "---" and never have.
+  document-start: disable
+
+  # GitHub's trigger key is `on:`, which YAML 1.1 reads as the boolean true.
+  # check-keys: false keeps the value check while allowing the key.
+  truthy:
+    check-keys: false
+
+  # 80 is too short for an actions `uses:` line carrying a SHA and a version
+  # comment, which cannot be wrapped.
+  line-length:
+    max: 120
+
+  # Both styles appear across these files; requiring one would be churn for
+  # no gain.
+  indentation:
+    indent-sequences: consistent
