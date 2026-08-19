@@ -2,5 +2,10 @@ dev/
 __pycache__/
 *.py[cod]
 build/
-pysum.egg-info/
 dist/
+*.egg-info/
+.venv/
+.coverage
+htmlcov/
+_site/
+_doctest/
