@@ -1,16 +1,14 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.12.5,<0.13"]
+build-backend = "uv_build"
 
 [project]
 name = "pysum"
-# Static rather than derived from a git tag, which is what py-canon uses:
-# this repo has no tags at all, so uv-dynamic-versioning would have nothing to
-# read. `preen adopt --release-migration` switches it over once a v0.1.1 tag
-# exists. 0.1.1 matches what is on PyPI today.
+# py-canon keeps one explicit version here, bumped with `uv version X.Y.Z`;
+# the matching vX.Y.Z tag is what identifies a release. 0.1.1 matches PyPI.
 version = "0.1.1"
 description = "Summarize pandas DataFrames"
-readme = "README.rst"
+readme = "README.md"
 # setup.py declared no python_requires, so PyPI shows the release as
 # installable on anything, and the classifiers advertised 2.7, 3.5 and 3.6.
 # That was already fiction for a pandas tool. This is the py-canon floor, and
@@ -34,15 +32,84 @@ classifiers = [
 # Unpinned, as setup.py had them. requirements.txt pins pytablewriter==0.27.2
 # and tabulate==0.8.2; those are a development lockfile and pinning them here
 # would force every consumer onto 2018 releases.
-dependencies = ["pandas", "pytablewriter", "tabulate"]
-
-[project.optional-dependencies]
-dev = ["check-manifest"]
-test = ["coverage"]
+# pytablewriter's Excel writer lives behind its `excel` extra (xlsxwriter). The
+# bare requirement meant `output_type="xlsx"` raised ModuleNotFoundError on a
+# clean install even though it is a documented output format.
+dependencies = ["pandas", "pytablewriter[excel]", "tabulate"]
 
 [project.urls]
 Homepage = "https://github.com/finite-sample/pysum"
+Documentation = "https://finite-sample.github.io/pysum/"
 Repository = "https://github.com/finite-sample/pysum"
 
-[tool.hatch.build.targets.wheel]
-packages = ["pysum"]
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+external = ["DOC"]
+select = [
+    "E", "W", "F", "I", "B", "C4", "UP", "N", "D", "S", "SIM", "T20", "PT", "RUF",
+    "PTH", "RET", "PIE", "FURB", "PERF", "DTZ", "LOG", "G", "TC", "FLY",
+    "RSE", "SLOT", "FA", "A", "EXE", "ICN", "PGH", "PLE", "ARG", "SLF",
+]
+# D203/D213: the google convention the fleet standard picks. W191/D206/D300:
+# ruff's own docs list these as always incompatible with `ruff format`, which
+# the standard also runs.
+ignore = ["D203", "D213", "W191", "D206", "D300"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "D", "ARG", "SLF"]
+"docs/**" = ["D"]
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "standard"
+
+[tool.pydoclint]
+style = "google"
+arg-type-hints-in-docstring = false
+check-return-types = false
+check-class-attributes = false
+allow-init-docstring = true
+exclude = '\.venv|tests|docs'
+
+[tool.uv.build-backend]
+module-name = "pysum"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src"]
+
+[tool.preen]
+# Each of these 404s only until this branch is on master: the workflow badges
+# need the workflows to have run there, the Pages URL needs the first docs
+# deploy, and the example outputs moved out of the package in the same commit.
+# They can be dropped once master carries them; lychee stays strict elsewhere.
+link_ignore = [
+    "finite-sample\\.github\\.io/pysum",
+    "github\\.com/finite-sample/pysum/actions/workflows/",
+    "github\\.com/finite-sample/pysum/blob/master/examples/",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14",
+    "pyright>=1.1.390",
+    "pydoclint>=0.5",
+    "pre-commit>=4",
+    { include-group = "test" },
+]
+test = ["pytest>=8", "pytest-cov>=6"]
+docs = [
+    "sphinx>=8",
+    "py-canon @ git+https://github.com/gojiplus/py-canon@v1",
+    "furo",
+    "myst-parser",
+    "sphinx-copybutton",
+]

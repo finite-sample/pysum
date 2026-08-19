@@ -1,3 +1,0 @@
-pandas>=0.22.0
-pytablewriter==0.27.2
-tabulate==0.8.2

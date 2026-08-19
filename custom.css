@@ -27,7 +27,7 @@ table td {
     border-left: 1px solid #cccccc;
 }
 
-table tr:nth-child(odd){ 
+table tr:nth-child(odd){
     background: #ffffff;
 }
 
@@ -35,4 +35,3 @@ table tr:nth-child(odd){
 table tr:nth-child(even){
     background: #fcfcfc;
 }
-
